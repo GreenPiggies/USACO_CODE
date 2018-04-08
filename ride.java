@@ -1,4 +1,4 @@
-package USACO_CODE;
+
 /*
 ID: hungwes1
 LANG: JAVA

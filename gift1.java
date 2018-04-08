@@ -1,4 +1,4 @@
-package USACO_CODE;
+
 
 import java.io.*;
 import java.util.*;
