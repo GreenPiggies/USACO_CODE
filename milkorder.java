@@ -1,99 +1,165 @@
-
-
+/*
+ID: greenpig
+LANG: JAVA
+TASK: milkorder
+*/
 import java.io.*;
 import java.util.*;
-public class milkorder {
 
-	public static void main(String[] args) throws Exception 
+public class milkorder 
+{
+	static int nCows;
+	static int nOrdered;
+	static int nFixed;
+	
+	static int[] hList;
+	static int[] pList;
+	//static boolean[] hInP;
+	static int[] pListIndices;
+	static int[] cowList;
+	public static void main(String[] args) throws Exception
 	{
-		BufferedReader f = new BufferedReader(new FileReader("milkorder.in"));
-	    
-	    PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("milkorder.out")));
-	    
-	    String[] firstRow = f.readLine().split(" ");
-	    	    
-	    int[] finalOrder = new int[Integer.parseInt(firstRow[0])];
-	    
-	    for (int i = 0; i < finalOrder.length; i++)
-	    {
-	    	finalOrder[i] = 0;
-	    }
-	    
-	    Map<Integer, Integer> cowPositions = new HashMap<>();
-	    
-	    int hNum = Integer.parseInt(firstRow[1]);    
-	    int pNum = Integer.parseInt(firstRow[2]);    
-	    
-	    String[] cowOrder = f.readLine().split(" ");
-	    ArrayList<Integer> order = new ArrayList<Integer>();
-	    for (int i = 0; i < hNum; i++)
-	    {
-	    	order.add(Integer.parseInt(cowOrder[i]));
-	    }
-	    
-	    
-	    String[] cowPosNum = f.readLine().split(" ");
-	    
-	    ArrayList<Integer> cows = new ArrayList<>();
-	    for (int i = 0; i < cowPosNum.length; i++)
-	    {
-	    	cows.add(Integer.parseInt(cowPosNum[i]));
-	    }
-	    
-	    String[] cowPos = f.readLine().split(" ");
-	    for (int i = 0; i < cowPos.length; i++)
-	    {
-	    	finalOrder[Integer.parseInt(cowPos[i]) - 1] = cows.get(i);
-	    	cowPositions.put(cows.get(i), Integer.parseInt(cowPos[i]) - 1);
-	    }
-	    
-	    
-	    System.out.println(cowPositions);
-	    for (int i = 0; i < finalOrder.length; i++)
-	    {
-	    	System.out.print(finalOrder[i] + " ");
-	    }
-	    
-	    //System.out.println("What the final order looks like before the big stuff: ");
-	    //printArray(finalOrder);
-	    
-	    int lastPosition = finalOrder.length - 1;
-	    
-	    for (int i = order.size() - 1; i > -1; i--)
-	    {
-	    	int cow = order.get(i);
-	    	if (!cowPositions.containsKey(cow))
-	    	{
-	    		for (int j = lastPosition; j > -1; j--, lastPosition--)
-	    		{
-	    			if (finalOrder[j] == 0)
-	    			{
-	    				finalOrder[j] = cow;
-	    				cowPositions.put(cow, j);
-	    				break;
-	    			}
-	    		}
-	    	} else
-	    	{
-	    		lastPosition = cowPositions.get(cow) - 1;
-	    	}
-	    }
-	    
-	    for (int i = 0; i < finalOrder.length; i++)
-	    {
-	    	if (finalOrder[i] == 0)
-	    	{
-	    		out.println(i + 1);
-		    	break;
-	    	}
-	    }
-	    
-	    //System.out.println("What the final order looks like after the big stuff: ");
-	    //printArray(finalOrder);
-	    
-	    out.close();
-	    
-
+		String problem = "milkorder";
+		Scanner in = new Scanner(new FileReader(problem + ".in"));
+		PrintWriter out = new PrintWriter(new FileWriter(problem + ".out"));
+		
+		init(in);
+		System.out.print("[");
+		for (int i = 0; i < nCows - 1; i++)
+		{
+			System.out.print(cowList[i] + " ");
+		}
+		System.out.print(cowList[nCows - 1] + "]");
+		
+		out.println(solve());
+		System.out.print("[");
+		for (int i = 0; i < nCows - 1; i++)
+		{
+			System.out.print(cowList[i] + " ");
+		}
+		System.out.print(cowList[nCows - 1] + "]");
+		
+		out.close();
+	}
+	
+	private static int solve() 
+	{
+		// First fill in the ordered cows.
+		
+		System.out.print("[");
+		for (int i = 0; i < nOrdered - 1; i++)
+		{
+			System.out.print(hList[i] + " ");
+		}
+		System.out.print(hList[nOrdered - 1] + "]");
+		
+		
+		if (contains(hList, 1))
+		{
+			System.out.println("hi");
+			int prevIndex = 0;
+			for (int i = 0; i < nOrdered; i++)
+			{
+				int curr = hList[i];
+				if (contains(pList, curr))
+				{
+					prevIndex = pListIndices[curr] + 1;
+				} else
+				{
+					for (int j = prevIndex; j < nCows; j++)
+					{
+						if (cowList[j] == 0)
+						{
+							cowList[j] = curr;
+							break;
+						}
+					}
+				}
+			}
+			for (int i = 0; i < nCows; i++)
+			{
+				if (cowList[i] == 1)
+				{
+					return i + 1;
+				}
+			}
+		} else
+		{
+			int prevIndex = nCows - 1;
+			for (int i = nOrdered - 1; i >= 0; i--)
+			{
+				int curr = hList[i];
+				if (contains(pList, curr))
+				{
+					prevIndex = pListIndices[curr] - 1;
+				} else
+				{
+					for (int j = prevIndex; j >= 0; j--)
+					{
+						if (cowList[j] == 0)
+						{
+							cowList[j] = curr;
+							break;
+						}
+					}
+				}
+			}
+			for (int i = 0; i < nCows; i++)
+			{
+				if (cowList[i] == 0)
+				{
+					return i + 1;
+				}
+			}
+		}
+		
+		
+		// Should never get here.
+		return -1;
 	}
 
+	private static boolean contains(int[] pList2, int hCow) 
+	{
+		for (int i = 0; i < pList2.length; i++)
+		{
+			System.out.println(pList2[i] + ", " + hCow);
+			if (pList2[i] == hCow)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static void init(Scanner in) 
+	{
+		nCows = in.nextInt();
+		nOrdered = in.nextInt();
+		nFixed = in.nextInt();
+		in.nextLine();
+		
+		cowList = new int[100];
+		hList = new int[100];
+		for (int i = 0; i < nOrdered; i++)
+		{
+			hList[i] = in.nextInt();
+			System.out.println("xd " + hList[i]);
+		}
+		in.nextLine();
+		
+		pList = new int[100];
+		pListIndices = new int[100];
+		for (int i = 0; i < nFixed; i++)
+		{
+			int value = in.nextInt();
+			int index = in.nextInt();
+			pList[i] = value;
+			pListIndices[pList[i]] = index - 1; 
+			System.out.println(index - 1);
+			cowList[index - 1] = value;
+		}		
+		
+		
+		
+	}
 }

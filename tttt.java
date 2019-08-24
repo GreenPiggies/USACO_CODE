@@ -3,105 +3,141 @@ ID: greenpig
 LANG: JAVA
 TASK: tttt
 */
-//package USACO_CODE;
-
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-public class tttt 
+public class tttt  
 {
-	private static int singleCowWin = 0;
-	private static int doubleCowWin = 0;
-
-	public static void main(String[] args) throws Exception 
+	static char[][] board;
+	static Set<Character> singleWinners;
+	static Set<Set<Character>> doubleWinners;
+	public static void main(String[] args) throws Exception
 	{
-		BufferedReader f = new BufferedReader(new FileReader("tttt.in"));
-	    
-	    
-	    PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("tttt.out")));	
-	    char[][] cowBoard = new char[3][3];
-	    
-	    for (int i = 0; i < 3; i++)
-	    {
-	    	String cowRow = f.readLine();
-	    	for (int j = 0; j < 3; j++)
-	    	{
-	    		cowBoard[i][j] = cowRow.charAt(j);
-	    	}
-	    }
-	    
-	    
-	    
-	    Set<Set<Character>> soloCombos = new HashSet<Set<Character>>();
-	    Set<Set<Character>> duoCombos = new HashSet<Set<Character>>();
-	    for (int rx = 0; rx < 3; rx++)
-	    {
-	    	Set<Character> rowSet = new HashSet<>();
-	    	for (int ry = 0; ry < 3; ry++)
-	    	{
-	    		rowSet.add(cowBoard[rx][ry]);
-	    	}
-	    	if (rowSet.size() == 1)
-		    {
-		    	soloCombos.add(rowSet);
-		    } else if (rowSet.size() == 2)
-		    {
-		    	duoCombos.add(rowSet);
-		    }
-	    }
-	    
-	    for (int cy = 0; cy < 3; cy++)
-	    {
-	    	Set<Character> columnSet = new HashSet<>();
-	    	for (int cx = 0; cx < 3; cx++)
-	    	{
-	    		columnSet.add(cowBoard[cx][cy]);
-	    	}
-	    	if (columnSet.size() == 1)
-		    {
-		    	soloCombos.add(columnSet);
-		    } else if (columnSet.size() == 2)
-		    {
-		    	duoCombos.add(columnSet);
-		    }
-	    }
-	    
-    	Set<Character> diag1Set = new HashSet<>();
-
-	    for (int d = 0; d < 3; d++)
-	    {
-	    	diag1Set.add(cowBoard[d][d]);
-	    }
-	    if (diag1Set.size() == 1)
-	    {
-	    	soloCombos.add(diag1Set);
-	    } else if (diag1Set.size() == 2)
-	    {
-	    	duoCombos.add(diag1Set);
-	    }
-	    
-    	Set<Character> diag2Set = new HashSet<>();
-
-    	for (int d = 0; d < 3; d++)
-	    {
-	    	diag2Set.add(cowBoard[d][2 - d]);
-	    }
-	    if (diag2Set.size() == 1)
-	    {
-	    	soloCombos.add(diag2Set);
-	    } else if (diag2Set.size() == 2)
-	    {
-	    	duoCombos.add(diag2Set);
-	    }
-	    
-	    
-	    
-	    out.println(soloCombos.size());
-	    out.println(duoCombos.size());
-	    
-	    out.close();
-	    
+		String problem = "tttt";
+		Scanner in = new Scanner(new FileReader(problem + ".in"));
+		PrintWriter out = new PrintWriter(new FileWriter(problem + ".out"));
+		
+		init(in);
+		
+		solve();
+		
+		System.out.println(singleWinners);
+		System.out.println(doubleWinners);
+		out.println(singleWinners.size());
+		out.println(doubleWinners.size());
+		
+		out.close();
 	}
+	
+	private static void solve()
+	{
+		computeSingleWinners();
+		computeDoubleWinners();
+	}
+	
+	private static void computeRows(int numCows)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			Set<Character> cows = new HashSet<Character>();
+			for (int j = 0; j < 3; j++)
+			{
+				char curr = board[i][j];
+				cows.add(curr);
+			}
+			if (cows.size() == numCows)
+			{
+				if (numCows == 1)
+				{
+					singleWinners.addAll(cows);
+				} else if (numCows == 2)
+				{
+					doubleWinners.add(cows);
+				}
+			}
+		}
+	}
+	
+	private static void computeColumns(int numCows)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			Set<Character> cows = new HashSet<Character>();
+			for (int i = 0; i < 3; i++)
+			{
+				char curr = board[i][j];
+				cows.add(curr);
+			}
+			if (cows.size() == numCows)
+			{
+				if (numCows == 1)
+				{
+					singleWinners.addAll(cows);
+				} else if (numCows == 2)
+				{
+					doubleWinners.add(cows);
+				}
+			}
+		}
+	}
+	
+	private static void computeDiagonals(int numCows)
+	{
+		Set<Character> diag1 = new HashSet<>();
+		Set<Character> diag2 = new HashSet<>();
+		for (int i = 0; i < 3; i++)
+		{
+			diag1.add(board[i][i]);
+			diag2.add(board[i][2-i]);
+		}
+		if (diag1.size() == numCows)
+		{
+			if (numCows == 1)
+			{
+				singleWinners.addAll(diag1);
+			} else if (numCows == 2)
+			{
+				doubleWinners.add(diag1);
+			}
+		}
+		if (diag2.size() == numCows)
+		{
+			if (numCows == 1)
+			{
+				singleWinners.addAll(diag2);
+			} else if (numCows == 2)
+			{
+				doubleWinners.add(diag2);
+			}
+		}
+	}
+	
+	private static void computeSingleWinners()
+	{
+		computeRows(1);
+		computeColumns(1);
+		computeDiagonals(1);
+	}
+	
+	private static void computeDoubleWinners()
+	{
+		computeRows(2);
+		computeColumns(2);
+		computeDiagonals(2);
+	}
+
+	private static void init(Scanner in) 
+	{
+		singleWinners = new HashSet<>();
+		doubleWinners = new HashSet<>();
+		board = new char[3][3];
+		for (int i = 0; i < 3; i++)
+		{
+			char[] row = in.nextLine().toCharArray();
+			board[i] = row;
+		}
+	}
+	
+	
 }
